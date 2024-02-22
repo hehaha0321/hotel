@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>添加房间</title>
+    <!-- 使用框架 -->
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">    
+    <!-- 引入jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <!-- 引入Bootstrap JavaScript (确保在jQuery之后) -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+    <!-- 控制表单大小，不要占满全屏 --> 
+    <div class="container" style="width: 50%;">
+    <h1>添加房间</h1>
+
+    <form method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="floor">楼层</label>
+            <input type="number" class="form-control" id="floor" name="floor" required>
+        </div>
+        <div class="form-group">
+            <label for="number">房间号</label>
+            <input type="number" class="form-control" id="number" name="number" required>
+        </div>
+        <div class="form-group">
+            <label for="room_image">房间照片</label>
+            <input type="file" class="form-control-file" id="room_image" name="room_image" accept="image/*" capture="environment">
+        </div>
+
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="ensuite" name="ensuite">
+            <label class="form-check-label" for="ensuite">独卫</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="air_conditioning" name="air_conditioning">
+            <label class="form-check-label" for="air_conditioning">空调</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="external_window" name="external_window">
+            <label class="form-check-label" for="external_window">外窗</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="large_room" name="large_room">
+            <label class="form-check-label" for="large_room">大房间</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="twin_room" name="twin_room">
+            <label class="form-check-label" for="twin_room">标间</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="long_term" name="long_term">
+            <label class="form-check-label" for="long_term">长租</label>
+        </div>
+        <!-- 快捷时间按钮自动填充 （租期开始 和 租期结束）， 今天 昨天 接下来一个月 
+        <div class="form-group">
+            <label for="rent_start_date">租期开始</label>
+            <input type="date" class="form-control" id="rent_start_date" name="rent_start_date">
+        </div>
+        <div class="form-group">
+            <label for="rent_end_date">租期结束</label>
+            <input type="date" class="form-control" id="rent_end_date" name="rent_end_date">
+        </div>
+        <div class="form-group">
+            <label for="tenant_phone">手机号</label>
+            <input type="text" class="form-control" id="tenant_phone" name="tenant_phone">
+        </div>
+        <div class="form-group">
+            <label for="id_card_image">身份证照片</label>
+            <input type="file" class="form-control-file" id="id_card_image" name="id_card_image" accept="image/*" capture="environment">
+        </div> -->
+        <!-- 房间定价 -->
+        <div class="form-group">
+            <label for="standard_price">房间定价</label>
+            <input type="float" class="form-control" id="standard_price" name="standard_price" required>
+        </div>
+        <button type="submit" class="btn btn-primary">添加房间</button>
+    </form>
+    <a href="/">返回列表</a>
+    </div>
+</body>
+</html>

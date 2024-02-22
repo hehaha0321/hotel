@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>房间 {{ room_id }} 的交易记录</title>
+</head>
+<body>
+    <h1>房间 {{ room_id }} 的交易记录</h1>
+    <table border="1">
+        <tr>
+            <th>日期</th>
+            <th>金额</th>
+            <th>描述</th>
+            <th>交易类型</th>
+        </tr>
+        {% for transaction in transactions %}
+        <tr>
+            <td>{{ transaction[2] }}</td>
+            <td>{{ transaction[3] }}</td>
+            <td>{{ transaction[4] }}</td>
+            <td>{{ '租金' if transaction[5] == 'rent' else '其他' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="/">返回首页</a>
+</body>
+</html>
