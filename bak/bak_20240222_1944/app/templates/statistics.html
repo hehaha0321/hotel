@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>统计信息</title>
+</head>
+<body>
+    <h1>统计信息</h1>
+    <h2>每个房间的总收入</h2>
+    <table border="1">
+        <tr>
+            <th>房间号</th>
+            <th>总收入</th>
+        </tr>
+        {% for room_income in income_per_room %}
+        <tr>
+            <td>{{ room_income[0] }}</td>
+            <td>{{ room_income[1] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <h2>每月的总收入</h2>
+    <table border="1">
+        <tr>
+            <th>月份</th>
+            <th>总收入</th>
+        </tr>
+        {% for month_income in income_per_month %}
+        <tr>
+            <td>{{ month_income[0] }}</td>
+            <td>{{ month_income[1] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="/">返回首页</a>
+</body>
+</html>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>酒店房间管理</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">    
+    <!-- 引入jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <!-- 引入Bootstrap JavaScript (确保在jQuery之后) -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/js/bootstrap.min.js"></script>
+
+
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>酒店房间管理</h1>
+        <div class="mb-3">
+            <label for="floorFilter" class="form-label">按楼层筛选:</label>
+            <!-- 楼层按钮 -->
+            <div id="floorButtons">
+                <!-- 动态生成楼层按钮 -->
+            </div>
+            <input type="number" class="form-control" id="floorFilter" placeholder="输入楼层">
+            <button class="btn btn-primary mt-2" id="filterByFloor">筛选</button>
+        </div>
+        
+        <div class="mb-3">
+            <label for="statusFilter" class="form-label">筛选空闲房间:</label>
+            <button class="btn btn-primary mt-2" id="filterByStatus">筛选</button>
+        </div>
+        <div class="mb-3">
+            <h2>新增房间</h2>
+            <button class="btn btn-primary mt-2" id="addRoom">新增房间</button>
+            <a href="/tenants" class="btn btn-primary mt-2">客户信息</a>
+        </div>
+        <div id="rooms" class="row">
+            <!-- 房间信息将在这里动态插入 -->
+        </div>
+    </div>
+
+    <script>
+
+        $('#addRoom').click(function() {
+            // 跳转到新的新增房间页面 /add_room
+            window.location.href = '/add_room';
+        
+        });
+
+        $(document).ready(function() {
+            // 获取所有房间信息
+            function fetchRooms() {
+                $.ajax({
+                    url: '/rooms',
+                    type: 'GET',
+                    success: function(data) {
+                        displayRooms(data);
+                    }
+                });
+            }
+
+            // 筛选空闲房间
+            $('#filterByStatus').click(function() {
+                $.ajax({
+                    url: '/rooms',
+                    type: 'GET',
+                    success: function(data) {
+                        var availableRooms = data.filter(room => room.status === 'available');
+                        displayRooms(availableRooms);
+                    }
+                });
+            });
+
+            // 楼层数组
+            const floors = [2, 3, 4, 5, 6, 7];
+            // 获取放置按钮的容器
+            const $floorButtonsDiv = $('#floorButtons');
+
+
+
+            // 筛选楼层的函数（示例）
+            function filterFloors(floor) {
+                console.log('筛选楼层：', floor);
+                // 确保floor是期望的数据类型，例如，如果需要数字类型，可以使用parseInt转换
+                var floorNumber = parseInt(floor, 10); // 仅当楼层值应为数字时使用
+                $.ajax({
+                    url: '/rooms',
+                    type: 'GET',
+                    success: function(data) {
+                        var filteredRooms = data.filter(room => parseInt(room.floor, 10) === floorNumber); // 仅当楼层值应为数字时使用
+                        console.log(filteredRooms);
+                        displayRooms(filteredRooms);
+                    }
+                });
+            }
+
+
+            // 为每个楼层创建按钮
+            $.each(floors, function(index, floor) {
+                const $button = $('<button></button>'); // 创建一个button元素
+                $button.addClass('btn btn-primary mt-2 me-2'); // 添加Bootstrap类
+                $button.text(floor + ' 层'); // 设置按钮文本
+                $button.on('click', function() { filterFloors(floor); }); // 点击按钮时筛选
+                $floorButtonsDiv.append($button); // 将按钮添加到页面上
+            });
+            
+
+            // 编辑房间
+            function updateRoom(roomId) {
+                console.log(roomId);
+                
+                // 弹出编辑窗口 
+                var room = getRoomById(roomId);
+                var editRoomForm = `
+                    <form id="editRoomForm" enctype="multipart/form-data">
+                        <input type="hidden" id="room_id" name="room_id" value="${room.id}">
+                        <input type="hidden" id="room_image_path" name="room_image_path" value="${room.room_image}">
+                        <div class="mb-3">
+                            <label for="floor" class="form-label">楼层:</label>
+                            <input type="number" class="form-control" id="floor" name="floor" value="${room.floor}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="number" class="form-label">房间号:</label>
+                            <input type="text" class="form-control" id="number" name="number" value="${room.number}">
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="ensuite" name="ensuite" ${room.ensuite ? 'checked' : ''}>
+                            <label class="form-check-label" for="ensuite">套间</label>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="air_conditioning" name="air_conditioning" ${room.air_conditioning ? 'checked' : ''}>
+                            <label class="form-check-label" for="air_conditioning">空调</label>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="external_window" name="external_window" ${room.external_window ? 'checked' : ''}>
+                            <label class="form-check-label" for="external_window">外窗</label>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="large_room" name="large_room" ${room.large_room ? 'checked' : ''}>
+                            <label class="form-check-label" for="large_room">大房间</label>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="twin_room" name="twin_room" ${room.twin_room ? 'checked' : ''}>
+                            <label class="form-check-label" for="twin_room">双人房</label>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="long_term" name="long_term" ${room.long_term ? 'checked' : ''}>
+                            <label class="form-check-label" for="long_term">长租</label>
+                        </div>
+                        <div class="mb-3">
+                            <label for="status" class="form-label">状态:</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="空闲" ${room.status === 'available' ? 'selected' : ''}>空闲</option>
+                                <option value="已预订" ${room.status === '已预订' ? 'selected' : ''}>已预订</option>
+                                <option value="已入住" ${room.status === 'expired' ? 'selected' : ''}>已入住</option>
+                            </select>
+                        </div>
+                        <img src="${room.room_image}" class="card-img-top" alt="房间图片">
+                        
+                        <div class="mb-3">
+                            <label for="room_image_path" class="form-label">更新房间图片:</label>
+                            <input type="file" class="form-control" id="room_image" name="room_image" value="${room.room_image}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="standard_price" class="form-label">标准价格:</label>
+                            <input type="float" class="form-control" id="standard_price" name="standard_price" value="${room.standard_price}">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                            <button type="submit" class="btn btn-primary">提交</button>
+                        </div>
+                    </form>`
+                var editRoomModal = `
+                    <div class="modal" id="editRoomModal" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">编辑房间</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">                                    
+                                    ${editRoomForm}
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                $('body').append(editRoomModal);
+                $('#editRoomModal').modal('show');
+
+                document.getElementById('editRoomForm').addEventListener('submit', function(event) {
+                    // event.preventDefault(); // 阻止表单默认提交行为
+
+                    var formData = new FormData(this); // 使用 this 引用当前表单
+
+                    fetch('/room/'+formData.get("room_id"), {
+                        method: 'POST',
+                        body: formData,
+                    })
+                    .then(response => {
+                        if(response.ok) {
+                            return response.json();
+                        }
+                        throw new Error('Network response was not ok.');
+                    })
+                    .then(data => {
+                        console.log(data);
+                        $('#editRoomModal').modal('hide'); // 提交成功后关闭模态框
+                    })
+                    .catch(error => {
+                        console.log('There was a problem with your fetch operation:', error);
+                        console.log('There was a problem with your fetch operation:', error);
+                    });
+                });
+            };
+
+            function getRoomById(roomId) {
+                var room = {};
+                $.ajax({
+                    url: '/room/' + roomId,
+                    type: 'GET',
+                    async: false,
+                    success: function(data) {
+                        room = data;
+                    }
+                });
+                return room;
+            };
+
+
+
+            // 显示房间信息
+            function displayRooms(rooms) {
+                $('#rooms').empty(); // 清空当前房间信息
+                rooms.forEach(function(room) {
+                    var roomCard = `
+                        <div class="col-md-4 mb-3">
+                            <div class="card">
+                                <img src="${room.room_image}" class="card-img-top" alt="房间图片">
+                                <div class="card-body">
+                                    <h5 class="card-title">房间号: ${room.number}</h5>
+                                    <p class="card-text">楼层: ${room.floor}</p>
+                                    <p class="card-text">状态: ${room.status}</p>
+                                    <p class="card-text">价格: ${room.standard_price}元/晚</p>
+                                    <button class="btn btn-primary edit-room" data-room-number="${room.id}">编辑</button>
+                                    <a href="/check_in/${room.id}" class="btn btn-primary ${room.status === 'available' ? '' : 'd-none'}">入住登记</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    $('#rooms').append(roomCard);
+                });
+                // 绑定点击事件到编辑按钮
+                $('.edit-room').click(function() {
+                    var roomId = $(this).data('room-number');
+                    updateRoom(roomId);
+                });
+            }
+
+
+            // Example function to get form data
+            // This function needs to be implemented according to your form structure
+            function getRoomFormData() {
+                // Assuming you have form fields with IDs corresponding to the room properties
+                return {
+                    floor: document.getElementById('floor').value,
+                    number: document.getElementById('number').value,
+                    ensuite: document.getElementById('ensuite').checked, // Assuming this is a checkbox
+                    air_conditioning: document.getElementById('air_conditioning').checked,
+                    external_window: document.getElementById('external_window').checked,
+                    large_room: document.getElementById('large_room').checked,
+                    twin_room: document.getElementById('twin_room').checked,
+                    long_term: document.getElementById('long_term').checked,
+                    status: document.getElementById('status').value,
+                    room_image: document.getElementById('room_image').value,
+                    room_image_path: document.getElementById('room_image_path').value,
+                    standard_price: document.getElementById('standard_price').value
+                };
+            }
+            // 初始加载所有房间信息
+            fetchRooms();
+        });
+
+       
+
+    </script>
+</head>
+<body>
+</body>
+</html>
