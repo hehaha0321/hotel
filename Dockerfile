@@ -14,7 +14,7 @@ EXPOSE 80
 ENV NAME World
 
 # 在容器启动时运行app.py
-CMD ["run.sh"]
+CMD ["/app/run.sh"]
 
 
 # # # 构建Docker镜像
