@@ -13,8 +13,11 @@ EXPOSE 80
 # 定义环境变量
 ENV NAME World
 
+# 下载依赖库
+RUN pip install --no-cache-dir -r app/requirements.txt --index-url="https://pypi.mirrors.ustc.edu.cn/simple/"
+
 # 在容器启动时运行app.py
-CMD ["/bin/sh", "/app/run.sh"]
+CMD ["python", "app/app.py"]
 
 
 # # # 构建Docker镜像
