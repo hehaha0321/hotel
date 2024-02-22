@@ -61,6 +61,18 @@
                 <option value="long_term">长租</option>
             </select>
         </div>
+
+        <!-- 选择是否有押金，有需要填写押金金额 -->
+        <div class="form-group">
+            <label for="deposit">押金</label>
+            <select class="form-select" id="deposit" name="deposit">
+                <option value="0">无押金</option>
+                <option value="1">有押金</option>
+            </select>
+            <!--有押金 填写押金金额 -->
+            <input type="float" class="form-control" id="deposit_price" name="deposit_price" value="0" style="display: none;">
+        </div>
+
         <!-- 身份证拍照照片上传 -->
         <div class="form-group">
             <label for="id_card_image">身份证照片</label>
@@ -92,6 +104,14 @@
             document.getElementById('rent_end_date').value = nextMonthStr;
             document.getElementById('lease_type').value = 'long_term';
         }
+        // 有押金时显示押金金额输入框
+        $('#deposit').change(function() {
+            if ($('#deposit').val() == 1) {
+                $('#deposit_price').show();
+            } else {
+                $('#deposit_price').hide();
+            }
+        });
     </script>
 
 </body>

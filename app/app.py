@@ -49,7 +49,7 @@ def init_db():
         )
     ''')
     
-    # 交易表
+    # 押金记录表
     c.execute('''
         CREATE TABLE IF NOT EXISTS transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -286,20 +286,33 @@ def check_in(room_id):
             SET occupied = 1, tenant_name = ?, rent_start_date = ?, rent_end_date = ?, status = 'occupied'
             WHERE id = ? and occupied = 0 
         ''', (tenant_name, rent_start_date, rent_end_date, room_id))
+
+
+        # 如果有押金需要创建押金记录
+        deposit_price = request.form.get('deposit_price')
+        if deposit_price:
+            c.execute('''
+                INSERT INTO transactions (tenant_id, date, amount, transaction_type, description)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (c.lastrowid, rent_start_date, deposit_price, 'deposit', '押金'))
+
+
         conn.commit()
         conn.close()
         return redirect(url_for('index'))
     return render_template('check_in.html', room_id=room_id, room_price=room_price)
 
-# 分页展示所有入住信息
+# 分页展示所有入住信息，以及押金信息
 @app.route('/tenants')
 def tenants():
     conn = sqlite3.connect('hotel.db')
     c = conn.cursor()
+    # 需要获取房间信息 租客信息 和 租客在房间的押金信息 
+    
     c.execute('''
-        SELECT tenants.id, tenants.room_id, tenants.tenant_name, tenants.tenant_phone, tenants.rent_start_date, tenants.rent_end_date, tenants.lease_type, tenants.id_card_image_path, tenants.price, rooms.floor, rooms.number
+        SELECT tenants.id, tenants.room_id, tenants.tenant_name, tenants.tenant_phone, tenants.rent_start_date, tenants.rent_end_date, tenants.lease_type, tenants.id_card_image_path, tenants.price, rooms.floor, rooms.number, transactions.date, transactions.amount, transactions.transaction_type, transactions.description
         FROM tenants
-        JOIN rooms ON tenants.room_id = rooms.id
+        JOIN rooms ON tenants.room_id = rooms.id JOIN transactions ON tenants.id = transactions.tenant_id
     ''')
     tenants = c.fetchall()
     conn.close()
