@@ -10,3 +10,19 @@ if [ ! -f app/hotel.db ]; then
     touch app/hotel.db
 fi
 
+# 更新代码
+git pull 
+
+# 创建虚拟环境 
+python3 -m venv venv
+
+# 应用虚拟环境 
+source venv/bin/activate
+
+# 安装依赖
+pip install -r requirements.txt
+
+# 运行程序 
+cd app/ ; python3 ./app.py
+
+
