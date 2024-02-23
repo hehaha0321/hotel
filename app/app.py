@@ -127,6 +127,7 @@ def add_room():
         print(today)
         # 处理房间照片上传
         room_image = request.files['room_image']
+        print(room_image)
         room_image_path = ''
         if room_image and allowed_file(room_image.filename):
             # 构造新的房间照片文件名
