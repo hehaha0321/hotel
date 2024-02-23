@@ -74,26 +74,26 @@ def index():
     rooms = c.fetchall()
     # 检查租期是否即将到期
     for i, room in enumerate(rooms):
-        if room[8]:  # 如果是长租房间
-            c.execute('''
-                SELECT date FROM transactions
-                WHERE room_id = ? AND transaction_type = 'rent'
-                ORDER BY date DESC LIMIT 1
-            ''', (room[0],))
+        # if room[8]:  # 如果是长租房间
+        #     c.execute('''
+        #         SELECT date FROM transactions
+        #         WHERE room_id = ? AND transaction_type = 'rent'
+        #         ORDER BY date DESC LIMIT 1
+        #     ''', (room[0],))
 
-            last_rent_payment = c.fetchone()
-            if last_rent_payment:
-                last_payment_date = datetime.strptime(last_rent_payment[0], '%Y-%m-%d')
-                next_payment_date = last_payment_date + timedelta(days=30)  # 假设每月交租
-                rooms[i] += (next_payment_date.strftime('%Y-%m-%d'),)
-                if next_payment_date <= datetime.now() + timedelta(days=7):  # 如果租金在一周内到期
-                    rooms[i] += ('租金即将到期！',)
-                else:
-                    rooms[i] += ('',)
-            else:
-                rooms[i] += ('', '')
-        else:
-            rooms[i] += ('', '')
+        #     last_rent_payment = c.fetchone()
+        #     if last_rent_payment:
+        #         last_payment_date = datetime.strptime(last_rent_payment[0], '%Y-%m-%d')
+        #         next_payment_date = last_payment_date + timedelta(days=30)  # 假设每月交租
+        #         rooms[i] += (next_payment_date.strftime('%Y-%m-%d'),)
+        #         if next_payment_date <= datetime.now() + timedelta(days=7):  # 如果租金在一周内到期
+        #             rooms[i] += ('租金即将到期！',)
+        #         else:
+        #             rooms[i] += ('',)
+        #     else:
+        #         rooms[i] += ('', '')
+        # else:
+        rooms[i] += ('', '')
     conn.close()
     return render_template('index.html', rooms=rooms, datetime=datetime)
 
@@ -136,6 +136,8 @@ def add_room():
             
             with Image.open(room_image_path) as img:
                 img.save(room_image_path, quality=60)
+        else:
+            room_image_path = ''
 
         
         # # 处理身份证照片上传
@@ -184,7 +186,7 @@ def room(room_id):
                 img.save(room_image_path, quality=60)
 
         else:
-            room_image_path = request.form['room_image_path']
+            room_image_path = ''
         conn = sqlite3.connect('hotel.db')
         c = conn.cursor()
         # 不是空值就更新，是空值就不更新        
