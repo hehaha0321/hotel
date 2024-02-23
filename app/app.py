@@ -127,6 +127,7 @@ def add_room():
         print(today)
         # 处理房间照片上传
         room_image = request.files['room_image']
+        room_image_path = ''
         if room_image and allowed_file(room_image.filename):
             # 构造新的房间照片文件名
             room_image_filename = f"room_{number}_{today}{get_file_extension(room_image.filename)}"
@@ -135,9 +136,7 @@ def add_room():
             # ...保存房间照片路径到数据库
             
             with Image.open(room_image_path) as img:
-                img.save(room_image_path, quality=40)
-        else:
-            room_image_path = ''
+                img.save(room_image_path, quality=40)            
 
         
         # # 处理身份证照片上传
@@ -177,6 +176,7 @@ def room(room_id):
         occupied = 'occupied' in request.form
         standard_price = request.form['standard_price']
         room_image = request.files['room_image']
+        room_image_path = ''
         if room_image and allowed_file(room_image.filename):
             room_image_filename = f"room_{number}_{datetime.datetime.now().strftime('%Y%m%d')}{get_file_extension(room_image.filename)}"
             room_image_path = os.path.join(app.config['ROOM_UPLOAD_FOLDER'], room_image_filename)
@@ -184,9 +184,6 @@ def room(room_id):
             room_image.save(room_image_path)
             with Image.open(room_image_path) as img:
                 img.save(room_image_path, quality=40)
-
-        else:
-            room_image_path = ''
         conn = sqlite3.connect('hotel.db')
         c = conn.cursor()
         # 不是空值就更新，是空值就不更新        
@@ -277,6 +274,7 @@ def check_in(room_id):
         lease_type = request.form['lease_type']
         price = request.form['price']
         id_card_image = request.files['id_card_image']
+        id_card_image_path = ''
         if id_card_image and allowed_file(id_card_image.filename):
             id_card_image_filename = f"id_{tenant_phone}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}{get_file_extension(id_card_image.filename)}"
             id_card_image_path = os.path.join(app.config['ID_UPLOAD_FOLDER'], id_card_image_filename)
@@ -285,8 +283,6 @@ def check_in(room_id):
             with Image.open(id_card_image_path) as img:
                 img.save(id_card_image_path, quality=40)
 
-        else:
-            id_card_image_path = ''
         conn = sqlite3.connect('hotel.db')
 
         # 如果房间不空是不可以住的 
