@@ -24,4 +24,4 @@ sudo docker rm ptest 2>/dev/null || true
 sudo docker rmi flask-app 2>/dev/null || true
 
 sudo docker build -t flask-app -f ./Dockerfile . || { echo 'docker build failed'; exit 1; }
-sudo docker run -dti --name ptest -p 5001:5000 flask-app || { echo 'docker run failed'; exit 1; }
+sudo docker run -dti --name ptest -p 5001:5000 -v ./app:/app flask-app || { echo 'docker run failed'; exit 1; }
