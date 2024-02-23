@@ -4,7 +4,7 @@ import sqlite3
 import datetime
 from werkzeug.utils import secure_filename
 import os
-
+from PIL import Image
 
 app = Flask(__name__)
 
@@ -131,8 +131,12 @@ def add_room():
             # 构造新的房间照片文件名
             room_image_filename = f"room_{number}_{today}{get_file_extension(room_image.filename)}"
             room_image_path = os.path.join(app.config['ROOM_UPLOAD_FOLDER'], room_image_filename)
-            room_image.save(room_image_path, quality=60)
+            room_image.save(room_image_path)
             # ...保存房间照片路径到数据库
+            
+            with Image.open(room_image_path) as img:
+                img.save(room_image_path, quality=60)
+
         
         # # 处理身份证照片上传
         # id_card_image = request.files['id_card_image']
@@ -175,7 +179,10 @@ def room(room_id):
             room_image_filename = f"room_{number}_{datetime.datetime.now().strftime('%Y%m%d')}{get_file_extension(room_image.filename)}"
             room_image_path = os.path.join(app.config['ROOM_UPLOAD_FOLDER'], room_image_filename)
             # 图片需要压缩到500k以下处理后保存 
-            room_image.save(room_image_path, quality=60)
+            room_image.save(room_image_path)
+            with Image.open(room_image_path) as img:
+                img.save(room_image_path, quality=60)
+
         else:
             room_image_path = request.form['room_image_path']
         conn = sqlite3.connect('hotel.db')
@@ -272,7 +279,10 @@ def check_in(room_id):
             id_card_image_filename = f"id_{tenant_phone}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}{get_file_extension(id_card_image.filename)}"
             id_card_image_path = os.path.join(app.config['ID_UPLOAD_FOLDER'], id_card_image_filename)
             # 图片需要压缩到500k以下处理后保存 
-            id_card_image.save(id_card_image_path, quality=60)
+            id_card_image.save(id_card_image_path)
+            with Image.open(id_card_image_path) as img:
+                img.save(id_card_image_path, quality=60)
+
         else:
             id_card_image_path = ''
         conn = sqlite3.connect('hotel.db')
