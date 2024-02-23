@@ -174,6 +174,8 @@ def room(room_id):
         if room_image and allowed_file(room_image.filename):
             room_image_filename = f"room_{number}_{datetime.datetime.now().strftime('%Y%m%d')}{get_file_extension(room_image.filename)}"
             room_image_path = os.path.join(app.config['ROOM_UPLOAD_FOLDER'], room_image_filename)
+            # 图片需要压缩到500k以下处理后保存 
+            room_image = room_image.resize((500, 500))
             room_image.save(room_image_path)
         else:
             room_image_path = request.form['room_image_path']
@@ -270,6 +272,8 @@ def check_in(room_id):
         if id_card_image and allowed_file(id_card_image.filename):
             id_card_image_filename = f"id_{tenant_phone}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}{get_file_extension(id_card_image.filename)}"
             id_card_image_path = os.path.join(app.config['ID_UPLOAD_FOLDER'], id_card_image_filename)
+            # 图片需要压缩到500k以下处理后保存 
+            id_card_image = id_card_image.resize((500, 500))
             id_card_image.save(id_card_image_path)
         else:
             id_card_image_path = ''
