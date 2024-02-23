@@ -2,6 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>酒店房间管理</title>
     <!-- 引入Bootstrap CSS -->
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">    
@@ -13,7 +14,7 @@
 
 </head>
 <body>
-    <div class="container mt-4">
+    <div class="col-12 col-sm-6 col-md-4 mb-3">
         <h1>酒店房间管理</h1>
         <div class="mb-3">
             <label for="floorFilter" class="form-label">按楼层筛选:</label>
@@ -159,7 +160,7 @@
                         
                         <div class="mb-3">
                             <label for="room_image_path" class="form-label">更新房间图片:</label>
-                            <input type="file" class="form-control" id="room_image" name="room_image" value="${room.room_image}">
+                            <input type="file" class="form-control" id="room_image" name="room_image">
                         </div>
                         <div class="mb-3">
                             <label for="standard_price" class="form-label">标准价格:</label>
