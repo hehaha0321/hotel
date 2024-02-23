@@ -195,7 +195,7 @@
                     // event.preventDefault(); // 阻止表单默认提交行为
 
                     var formData = new FormData(this); // 使用 this 引用当前表单
-
+                    console.log(formData);
                     fetch('/room/'+formData.get("room_id"), {
                         method: 'POST',
                         body: formData,
