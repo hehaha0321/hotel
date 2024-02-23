@@ -135,7 +135,7 @@ def add_room():
             # ...保存房间照片路径到数据库
             
             with Image.open(room_image_path) as img:
-                img.save(room_image_path, quality=60)
+                img.save(room_image_path, quality=40)
         else:
             room_image_path = ''
 
@@ -183,7 +183,7 @@ def room(room_id):
             # 图片需要压缩到500k以下处理后保存 
             room_image.save(room_image_path)
             with Image.open(room_image_path) as img:
-                img.save(room_image_path, quality=60)
+                img.save(room_image_path, quality=40)
 
         else:
             room_image_path = ''
@@ -283,7 +283,7 @@ def check_in(room_id):
             # 图片需要压缩到500k以下处理后保存 
             id_card_image.save(id_card_image_path)
             with Image.open(id_card_image_path) as img:
-                img.save(id_card_image_path, quality=60)
+                img.save(id_card_image_path, quality=40)
 
         else:
             id_card_image_path = ''
