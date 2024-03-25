@@ -219,7 +219,7 @@ def room(room_id):
         'standard_price': room[15],
     }
     conn.close()
-    return room
+    return render_template('edit_room.html', room=room)
 
 
 # 返回所有房间信息
@@ -252,6 +252,10 @@ def rooms():
         }
         if room[12] is not None and room[12] > datetime.datetime.now().strftime('%Y-%m-%d'):
             rooms[i]['status'] = 'occupied'
+        if rooms[i]['status'] == 'occupied':
+            rooms[i]['status'] = '已入住'
+        elif rooms[i]['status'] == 'available':
+            rooms[i]['status'] = '空闲'
     return rooms
 
 # 入住登记 
@@ -283,6 +287,14 @@ def check_in(room_id):
             id_card_image.save(id_card_image_path)
             with Image.open(id_card_image_path) as img:
                 img.save(id_card_image_path, quality=40)
+                # 获取房间当前信息 
+        # 检查房间时间信息，是否冲突，冲突就改为续租 
+        if room[12] is not None and room[12] > datetime.datetime.now().strftime('%Y-%m-%d'):
+            lease_type = '续租'
+            # 计算时间差 
+            datesub = datetime.datetime.strptime(rent_end_date, '%Y-%m-%d') - datetime.datetime.strptime(rent_start_date, '%Y-%m-%d')
+            # 结束时间加上 前端传的两个时间(rent_start_date,rent_end_date)的时间差
+            rent_end_date = datetime.datetime.strptime(room[12], '%Y-%m-%d') + datesub
 
         conn = sqlite3.connect('hotel.db')
 
