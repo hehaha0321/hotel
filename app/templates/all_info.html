@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>酒店收入统计</title>
+
+    <!-- 引入 Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .container {
+            width: 80%;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 控制表单大小，不要占满全屏 --> 
+    <div class="container">
+        <h1>酒店收入统计</h1>
+
+        <h2>每个房间收入信息</h2>
+        <div id="roomIncomeChart"></div>
+
+        <h2>整个酒店某一天收入信息</h2>
+        <canvas id="hotelIncomeChart"></canvas>
+
+        <h2>其他分析表信息</h2>
+        <canvas id="otherAnalysisChart"></canvas>
+
+        <a href="/">返回首页</a>
+    </div>
+
+    <script>
+        // 获取每个房间收入数据的 API URL
+        const roomIncomeApiUrl = '/tenants_api';
+
+        // 获取整个酒店某一天收入数据的 API URL
+        const hotelIncomeApiUrl = '/tenants_api';
+
+        // 获取其他分析表数据的 API URL
+        const otherAnalysisApiUrl = '/tenants_api';
+
+        // 获取每个房间收入数据并绘制图表
+        async function fetchRoomIncomeDataAndDrawChart() {
+            try {
+                const response = await fetch(roomIncomeApiUrl);
+                const data = await response.json();
+
+                const roomIds = [];
+                const amounts = [];
+
+                for (const tenant of data) {
+                    const roomId = tenant.room_id;
+                    const amount = tenant.amount;
+
+                    roomIds.push(roomId);
+                    amounts.push(amount);
+                }
+
+                // 使用 Plotly 绘制柱状图
+                Plotly.newPlot('roomIncomeChart', [{
+                    x: roomIds,
+                    y: amounts,
+                    type: 'bar'
+                }]);
+            } catch (error) {
+                console.error('获取每个房间收入数据出错:', error);
+            }
+        }
+
+        // 获取整个酒店某一天收入数据并绘制图表
+        async function fetchHotelIncomeDataAndDrawChart() {
+            try {
+                const response = await fetch(hotelIncomeApiUrl);
+                const data = await response.json();
+
+                const dates = [];
+                const amounts = [];
+
+                for (const tenant of data) {
+                    const date = tenant.date;
+                    const amount = tenant.amount;
+
+                    dates.push(date);
+                    amounts.push(amount);
+                }
+
+                // 使用 Chart.js 绘制折线图
+                const ctx = document.getElementById('hotelIncomeChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: dates,
+                        datasets: [{
+                            label: '收入金额',
+                            data: amounts,
+                            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('获取整个酒店某一天收入数据出错:', error);
+            }
+        }
+
+        // 获取其他分析表数据并绘制图表
+        async function fetchOtherAnalysisDataAndDrawChart() {
+            try {
+                const response = await fetch(otherAnalysisApiUrl);
+                const data = await response.json();
+
+                const labels = [];
+                const dataPoints = [];
+
+                for (const tenant of data) {
+                    // 根据实际数据结构，进行数据处理和计算
+                    // 将处理后的数据添加到 labels 和 dataPoints 数组中
+                    labels.push(tenant.room_id);
+                    dataPoints.push(tenant.amount);
+                }
+
+                // 使用 Chart.js 绘制饼图
+                const ctx = document.getElementById('otherAnalysisChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: dataPoints,
+                            backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)'],
+                            borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {}
+                });
+            } catch (error) {
+                console.error('获取其他分析表数据出错:', error);
+            }
+        }
+
+        // 页面加载完成后获取数据并绘制图表
+        document.addEventListener('DOMContentLoaded', async () => {
+            await Promise.all([
+                fetchRoomIncomeDataAndDrawChart(),
+                fetchHotelIncomeDataAndDrawChart(),
+                fetchOtherAnalysisDataAndDrawChart()
+            ]);
+        });
+    </script>
+</body>
+</html>

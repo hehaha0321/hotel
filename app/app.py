@@ -378,7 +378,10 @@ def tenants_api():
         }
     return tenants
  
-
+# 统计信息展示 all_info
+@app.route('/all_info')
+def all_info():
+    return render_template('all_info.html')
 
 # 添加交易记录页面
 @app.route('/add_transaction/<int:room_id>', methods=['GET', 'POST'])
