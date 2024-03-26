@@ -30,12 +30,12 @@
         <div class="row justify-content-center">
             <div class="col-12 col-md-8">
                 <div class="mb-3">
-                    <label for="floorFilter" class="form-label">按楼层筛选:</label>
+                    <label for="floorButtons" class="form-label">按楼层筛选:</label>
                     <div id="floorButtons" class="mb-2">
                         <!-- 动态生成楼层按钮 -->
                     </div>
-                    <input type="number" class="form-control" id="floorFilter" placeholder="输入楼层">
-                    <button class="btn btn-primary mt-2" id="filterByFloor">筛选</button>
+                    <input type="number" class="form-control" id="floorFilter" placeholder="输入房间号">
+                    <button class="btn btn-primary mt-2" id="filterByNumber">筛选</button>
                 </div>
                 
                 <div class="mb-3">
@@ -62,9 +62,9 @@
 
             $('#addRoom').click(() => window.location.href = '/add_room');
             $('#filterByStatus').click(() => fetchRooms({status: '空闲'}));
-            $('#filterByFloor').click(() => {
-                const floor = $('#floorFilter').val();
-                fetchRooms({floor: floor});
+            $('#filterByNumber').click(() => {
+                const number = $('#floorFilter').val();
+                fetchRooms({number: number});
             });
 
             function initFloorButtons(floors) {
@@ -84,6 +84,7 @@
                 // 启用查询参数的构建，如果您的后端支持
                 if (params.status) queryParams.push(`status=${params.status}`);
                 if (params.floor) queryParams.push(`floor=${parseInt(params.floor, 10)}`); // 确保楼层值是数字
+                if (params.number) queryParams.push(`number=${params.number}`);
                 if (queryParams.length) url += `?${queryParams.join('&')}`;
 
                 $.get(url, function(data) {
@@ -92,6 +93,9 @@
                         data = data.filter(room => room.status === params.status && room.floor === parseInt(params.floor, 10));
                         displayRooms(data);
                         return;
+                    }
+                    if (params.number) {
+                        data = data.filter(room => room.number === parseInt(params.number, 10));
                     }
 
                     if (params.status) {

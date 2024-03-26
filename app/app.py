@@ -270,8 +270,8 @@ def check_in(room_id):
     
     room_price = room[15]
     if request.method == 'POST':
-        if room[9] == 1:
-            return redirect(url_for('index'))
+        # if room[9] == 1:
+        #     return redirect(url_for('index'))
         tenant_name = request.form['tenant_name']
         tenant_phone = request.form['tenant_phone']
         rent_start_date = request.form['rent_start_date']
@@ -288,6 +288,7 @@ def check_in(room_id):
             with Image.open(id_card_image_path) as img:
                 img.save(id_card_image_path, quality=40)
                 # 获取房间当前信息 
+        print("roomInfo:",room[0], room[10], room[11], room[12], room[15])
         # 检查房间时间信息，是否冲突，冲突就改为续租 
         if room[12] is not None and room[12] > datetime.datetime.now().strftime('%Y-%m-%d'):
             lease_type = '续租'
@@ -295,19 +296,23 @@ def check_in(room_id):
             datesub = datetime.datetime.strptime(rent_end_date, '%Y-%m-%d') - datetime.datetime.strptime(rent_start_date, '%Y-%m-%d')
             # 结束时间加上 前端传的两个时间(rent_start_date,rent_end_date)的时间差
             rent_end_date = datetime.datetime.strptime(room[12], '%Y-%m-%d') + datesub
+            rent_end_date = rent_end_date.strftime('%Y-%m-%d')
+
+        print(room_id, tenant_name, tenant_phone, rent_start_date, rent_end_date, price)
 
         conn = sqlite3.connect('hotel.db')
 
+        room_num = room[2]
         # 如果房间不空是不可以住的 
         c = conn.cursor()
         c.execute('''
             INSERT INTO tenants (room_id, tenant_name, tenant_phone, rent_start_date, rent_end_date, lease_type, id_card_image_path, price)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (room_id, tenant_name, tenant_phone, rent_start_date, rent_end_date, lease_type, id_card_image_path, price))
+        ''', (room_num, tenant_name, tenant_phone, room[12], rent_end_date, lease_type, id_card_image_path, price))
         c.execute('''
             UPDATE rooms
             SET occupied = 1, tenant_name = ?, rent_start_date = ?, rent_end_date = ?, status = 'occupied'
-            WHERE id = ? and occupied = 0 
+            WHERE id = ? 
         ''', (tenant_name, rent_start_date, rent_end_date, room_id))
 
 
@@ -335,7 +340,7 @@ def tenants():
     c.execute('''
         SELECT tenants.id, tenants.room_id, tenants.tenant_name, tenants.tenant_phone, tenants.rent_start_date, tenants.rent_end_date, tenants.lease_type, tenants.id_card_image_path, tenants.price, rooms.floor, rooms.number, transactions.date, transactions.amount, transactions.transaction_type, transactions.description
         FROM tenants
-        JOIN rooms ON tenants.room_id = rooms.id JOIN transactions ON tenants.id = transactions.tenant_id
+        JOIN rooms ON tenants.room_id = rooms.number JOIN transactions ON tenants.id = transactions.tenant_id
     ''')
     tenants = c.fetchall()
     conn.close()
