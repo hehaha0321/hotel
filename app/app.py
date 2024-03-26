@@ -345,6 +345,38 @@ def tenants():
     tenants = c.fetchall()
     conn.close()
     return render_template('tenants.html', tenants=tenants)
+
+# 所有入住信息api 
+@app.route('/tenants_api')
+def tenants_api():
+    conn = sqlite3.connect('hotel.db')
+    c = conn.cursor()
+    c.execute('''
+        SELECT tenants.id, tenants.room_id, tenants.tenant_name, tenants.tenant_phone, tenants.rent_start_date, tenants.rent_end_date, tenants.lease_type, tenants.id_card_image_path, tenants.price, rooms.floor, rooms.number, transactions.date, transactions.amount, transactions.transaction_type, transactions.description
+        FROM tenants
+        JOIN rooms ON tenants.room_id = rooms.number JOIN transactions ON tenants.id = transactions.tenant_id
+    ''')
+    tenants = c.fetchall()
+    conn.close()
+    for i, tenant in enumerate(tenants):
+        tenants[i] = {
+            'id': tenant[0],
+            'room_id': tenant[1],
+            'tenant_name': tenant[2],
+            'tenant_phone': tenant[3],
+            'rent_start_date': tenant[4],
+            'rent_end_date': tenant[5],
+            'lease_type': tenant[6],
+            'id_card_image_path': tenant[7],
+            'price': tenant[8],
+            'floor': tenant[9],
+            'number': tenant[10],
+            'date': tenant[11],
+            'amount': tenant[12],
+            'transaction_type': tenant[13],
+            'description': tenant[14]
+        }
+    return tenants
  
 
 

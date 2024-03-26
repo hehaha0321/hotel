@@ -10,57 +10,98 @@
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">    
     <!-- 引入jQuery -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <!-- 引入Bootstrap JavaScript (确保在jQuery之后) -->
+    <!-- 引入DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css" rel="stylesheet">
+    <!-- 引入DataTables JavaScript -->
+    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+    <!-- 引入Bootstrap JavaScript (确保在jQuery和DataTables之后) -->
     <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/js/bootstrap.min.js"></script>
     <style>
         .container {
-            width: 50%;
+            width: 80%;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
     <!-- 控制表单大小，不要占满全屏 --> 
-    <div class="col-12 col-sm-6 col-md-4 mb-3">
+    <div class="container">
         <h1>客户信息列表</h1>
 
-    <table class="table table-striped">
-        <tr>
-            <th>房间号</th>
-            <th>客户姓名</th>
-            <th>客户电话</th>
-            <th>入住日期</th>
-            <th>退房日期</th>
-            <th>租房类型</th>
-            <th>身份证照片</th>
-            <th>支付金额</th>
-            <th>楼层</th>
-            <th>房间号</th>
-            <th>押金日期</th>
-            <th>押金金额</th>
-            <th>交易描述</th>
-        </tr>
-        {% for tenant in tenants %}
-        <tr>
-            <td>{{ tenant[1] }}</td>
-            <td>{{ tenant[2] }}</td>
-            <td>{{ tenant[3] }}</td>
-            <td>{{ tenant[4] }}</td>
-            <td>{{ tenant[5] }}</td>
-            <td>{{ tenant[6] }}</td>
-            <td><img src="{{ tenant[7] }}" alt="身份证照片" width="100"></td>
-            <td>{{ tenant[8] }}</td>
-            <td>{{ tenant[9] }}</td>
-            <td>{{ tenant[10] }}</td>
-            <td>{{ tenant[11] }}</td>
-            <td>{{ tenant[12] }}</td>
-            <td>{{ tenant[14] }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    <a href="/">返回首页</a>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="searchInput" class="form-label">搜索:</label>
+                <input type="text" class="form-control" id="searchInput">
+            </div>
+        </div>
+
+        <table class="table table-striped" id="tenantsTable">
+            <thead>
+                <tr>
+                    <th>房间号</th>
+                    <th>客户姓名</th>
+                    <th>客户电话</th>
+                    <th>入住日期</th>
+                    <th>退房日期</th>
+                    <th>租房类型</th>
+                    <th>身份证照片</th>
+                    <th>支付金额</th>
+                    <th>楼层</th>
+                    <th>房间号</th>
+                    <th>押金日期</th>
+                    <th>押金金额</th>
+                    <th>交易描述</th>
+                </tr>
+            </thead>
+        </table>
+
+        <a href="/">返回首页</a>
     </div>
+
+    <script>
+        $(document).ready(function() {
+            const table = $('#tenantsTable').DataTable({
+                ajax: {
+                    url: '/tenants_api',
+                    dataSrc: ''
+                },
+                columns: [
+                    { data: 'room_id' },
+                    { data: 'tenant_name' },
+                    { data: 'tenant_phone' },
+                    { data: 'rent_start_date' },
+                    { data: 'rent_end_date' },
+                    { data: 'lease_type' },
+                    {
+                        data: 'id_card_image_path',
+                        render: function(data) {
+                            return '<img src="/' + data + '" alt="身份证照片" width="100">';
+                        }
+                    },
+                    { data: 'price' },
+                    { data: 'floor' },
+                    { data: 'number' },
+                    { data: 'date' },
+                    { data: 'amount' },
+                    { data: 'description' }
+                ],
+                paging: true,
+                searching: true,
+                lengthChange: false,
+                pageLength: 10,
+                language: {
+                    search: '搜索:',
+                    paginate: {
+                        previous: '&laquo;',
+                        next: '&raquo;'
+                    }
+                }
+            });
+
+            $('#searchInput').on('input', function() {
+                table.search(this.value).draw();
+            });
+        });
+    </script>
 </body>
-
-
-
 </html>
