@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# 指定目录路径
+dir=~/code/python/hotel_product/hotel_prod/hotel/bak
+
+# 按照时间排序并删除旧的目录，只保留最新的两个
+ls -1tr $dir | head -n -2 | xargs -d '\n' rm -rf
+
 # 存储当前日期和时间
 current_datetime=$(date +%Y%m%d_%H%M)
 
