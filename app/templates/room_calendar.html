@@ -33,6 +33,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
         }
         
         .header-cell {
@@ -52,21 +53,40 @@
         
         .day-cell {
             border: 1px solid #dee2e6;
+            color: black;
+            font-size: 12px;
+            padding: 5px;
         }
         
         .day-cell.occupied {
-            background-color: #dc3545;
-            color: white;
+            background-color: #28a745; /* 绿色背景 */
+            color: black; /* 黑色文字 */
         }
         
         .day-cell.available {
-            background-color: #28a745;
-            color: white;
+            background-color: white; /* 白色背景 */
+            color: black; /* 黑色文字 */
         }
         
         .day-cell.unknown {
             background-color: #6c757d;
-            color: white;
+            color: black;
+        }
+        
+        .tenant-info {
+            text-align: center;
+            z-index: 2;
+            width: 100%;
+        }
+        
+        .tenant-name {
+            font-weight: bold;
+            display: block;
+        }
+        
+        .tenant-phone {
+            font-size: 11px;
+            display: block;
         }
         
         .controls {

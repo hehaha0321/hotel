@@ -268,8 +268,12 @@ def rooms():
     print("Fetched rooms:", rooms)  # 打印获取到的房间数据
     
     # 返回结构性map json列表，方便前端渲染
+    result = []
+    conn = sqlite3.connect('hotel.db')
+    c = conn.cursor()
+    
     for i, room in enumerate(rooms):
-        rooms[i] = {
+        room_dict = {
             'id': room[0],
             'floor': room[1],
             'number': room[2],
@@ -287,13 +291,36 @@ def rooms():
             'room_image': room[14],
             'standard_price': room[15]
         }
+        
+        # 获取租客信息（包括电话）
+        c.execute('''
+            SELECT tenant_name, tenant_phone, rent_start_date, rent_end_date 
+            FROM tenants 
+            WHERE room_id = ? 
+            ORDER BY id DESC 
+            LIMIT 1
+        ''', (room[2],))  # room[2]是房间号
+        tenant_data = c.fetchone()
+        if tenant_data:
+            room_dict['tenant_name'] = tenant_data[0]
+            room_dict['tenant_phone'] = tenant_data[1]
+            # 如果租客表中的日期更新，则使用租客表中的日期
+            if tenant_data[2]:
+                room_dict['rent_start_date'] = tenant_data[2]
+            if tenant_data[3]:
+                room_dict['rent_end_date'] = tenant_data[3]
+        
         if room[12] is not None and room[12] > datetime.datetime.now().strftime('%Y-%m-%d'):
-            rooms[i]['status'] = 'occupied'
-        if rooms[i]['status'] == 'occupied':
-            rooms[i]['status'] = '已入住'
-        elif rooms[i]['status'] == 'available':
-            rooms[i]['status'] = '空闲'
-    return rooms
+            room_dict['status'] = 'occupied'
+        if room_dict['status'] == 'occupied':
+            room_dict['status'] = '已入住'
+        elif room_dict['status'] == 'available':
+            room_dict['status'] = '空闲'
+            
+        result.append(room_dict)
+        
+    conn.close()
+    return result
 
 # 入住登记 
 @app.route('/check_in/<int:room_id>', methods=['GET', 'POST'])
