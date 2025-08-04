@@ -232,6 +232,8 @@ def rooms():
     floor = request.args.get('floor')
     number = request.args.get('number')
     
+    print("Query parameters:", {"status": status, "floor": floor, "number": number})  # 打印查询参数
+    
     # 构建查询语句
     query = 'SELECT * FROM rooms'
     conditions = []
@@ -256,9 +258,15 @@ def rooms():
     
     query += ' ORDER BY floor, number'
     
+    print("SQL query:", query)  # 打印SQL查询语句
+    print("Query parameters:", params)  # 打印查询参数
+    
     c.execute(query, params)
     rooms = c.fetchall()
     conn.close()
+    
+    print("Fetched rooms:", rooms)  # 打印获取到的房间数据
+    
     # 返回结构性map json列表，方便前端渲染
     for i, room in enumerate(rooms):
         rooms[i] = {
