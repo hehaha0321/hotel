@@ -77,6 +77,18 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .floor-filter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .filter-buttons {
+            margin-bottom: 15px;
         }
     </style>
 </head>
@@ -91,6 +103,19 @@
                 <button class="btn btn-primary" id="nextMonth">下一月 &gt;</button>
                 <a href="/" class="btn btn-secondary">返回首页</a>
             </div>
+            
+            <div class="floor-filter">
+                <span>按楼层筛选:</span>
+                <div class="filter-buttons" id="floorButtons">
+                    <button class="btn btn-sm btn-outline-primary me-1" data-floor="all">全部</button>
+                    <button class="btn btn-sm btn-outline-primary me-1" data-floor="2">2楼</button>
+                    <button class="btn btn-sm btn-outline-primary me-1" data-floor="3">3楼</button>
+                    <button class="btn btn-sm btn-outline-primary me-1" data-floor="4">4楼</button>
+                    <button class="btn btn-sm btn-outline-primary me-1" data-floor="5">5楼</button>
+                    <button class="btn btn-sm btn-outline-primary me-1" data-floor="6">6楼</button>
+                    <button class="btn btn-sm btn-outline-primary me-1" data-floor="7">7楼</button>
+                </div>
+            </div>
         </div>
         
         <div id="calendar-container">
@@ -102,6 +127,7 @@
         // 当前显示的月份（默认为当前月份）
         let currentYear = new Date().getFullYear();
         let currentMonth = new Date().getMonth(); // 0-11
+        let currentFloor = 'all'; // 当前筛选的楼层，默认为全部
 
         $(document).ready(function() {
             renderCalendar();
@@ -123,6 +149,14 @@
                 }
                 renderCalendar();
             });
+            
+            // 楼层筛选按钮事件
+            $('#floorButtons button').click(function() {
+                $('#floorButtons button').removeClass('btn-primary').addClass('btn-outline-primary');
+                $(this).removeClass('btn-outline-primary').addClass('btn-primary');
+                currentFloor = $(this).data('floor');
+                renderCalendar();
+            });
         });
 
         function renderCalendar() {
@@ -141,6 +175,10 @@
 
         function fetchRoomsAndRenderCalendar(daysInMonth) {
             $.get('/rooms', function(rooms) {
+                // 根据楼层筛选房间
+                if (currentFloor !== 'all') {
+                    rooms = rooms.filter(room => room.floor == currentFloor);
+                }
                 renderRoomCalendar(rooms, daysInMonth);
             });
         }
@@ -160,7 +198,7 @@
             // 为每个房间添加一行
             rooms.forEach(room => {
                 // 房间号单元格
-                $grid.append(`<div class="calendar-cell room-cell">${room.number}房</div>`);
+                $grid.append(`<div class="calendar-cell room-cell">${room.floor}楼${room.number}房</div>`);
                 
                 // 为该房间的每一天添加单元格
                 for (let day = 1; day <= daysInMonth; day++) {
