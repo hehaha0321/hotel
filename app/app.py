@@ -491,6 +491,12 @@ def get_file_extension(filename):
 
 
 
+# 新增路由：房间月度视图
+@app.route('/room_calendar')
+def room_calendar():
+    return render_template('room_calendar.html')
+
+
 # 初始化数据库
 init_db()
 

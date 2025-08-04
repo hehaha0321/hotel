@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>房间月度视图</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/js/bootstrap.min.js"></script>
+    <style>
+        body {
+            padding: 20px;
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: 150px repeat(31, 1fr);
+            gap: 2px;
+            margin-bottom: 10px;
+        }
+        
+        .calendar-cell {
+            padding: 10px;
+            text-align: center;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .header-cell {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            border: 1px solid #dee2e6;
+        }
+        
+        .room-cell {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            border: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .day-cell {
+            border: 1px solid #dee2e6;
+        }
+        
+        .day-cell.occupied {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .day-cell.available {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .day-cell.unknown {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .controls {
+            margin-bottom: 20px;
+        }
+        
+        .month-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <h1 class="text-center mb-4">房间月度视图</h1>
+        
+        <div class="controls">
+            <div class="month-selector">
+                <button class="btn btn-primary" id="prevMonth">&lt; 上一月</button>
+                <h3 id="currentMonth"></h3>
+                <button class="btn btn-primary" id="nextMonth">下一月 &gt;</button>
+                <a href="/" class="btn btn-secondary">返回首页</a>
+            </div>
+        </div>
+        
+        <div id="calendar-container">
+            <!-- 日历将通过JavaScript动态生成 -->
+        </div>
+    </div>
+
+    <script>
+        // 当前显示的月份（默认为当前月份）
+        let currentYear = new Date().getFullYear();
+        let currentMonth = new Date().getMonth(); // 0-11
+
+        $(document).ready(function() {
+            renderCalendar();
+            
+            $('#prevMonth').click(function() {
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+                renderCalendar();
+            });
+            
+            $('#nextMonth').click(function() {
+                currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                renderCalendar();
+            });
+        });
+
+        function renderCalendar() {
+            // 更新月份显示
+            const monthNames = ["一月", "二月", "三月", "四月", "五月", "六月",
+                               "七月", "八月", "九月", "十月", "十一月", "十二月"];
+            $('#currentMonth').text(`${currentYear}年 ${monthNames[currentMonth]}`);
+            
+            // 获取该月的天数
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay(); // 0=周日, 1=周一, ...
+            
+            // 获取房间数据
+            fetchRoomsAndRenderCalendar(daysInMonth);
+        }
+
+        function fetchRoomsAndRenderCalendar(daysInMonth) {
+            $.get('/rooms', function(rooms) {
+                renderRoomCalendar(rooms, daysInMonth);
+            });
+        }
+
+        function renderRoomCalendar(rooms, daysInMonth) {
+            const $container = $('#calendar-container').empty();
+            
+            // 创建日历网格
+            const $grid = $('<div class="calendar-grid"></div>');
+            
+            // 添加表头（房间号和日期）
+            $grid.append('<div class="calendar-cell header-cell">房间</div>');
+            for (let day = 1; day <= daysInMonth; day++) {
+                $grid.append(`<div class="calendar-cell header-cell">${day}日</div>`);
+            }
+            
+            // 为每个房间添加一行
+            rooms.forEach(room => {
+                // 房间号单元格
+                $grid.append(`<div class="calendar-cell room-cell">${room.number}房</div>`);
+                
+                // 为该房间的每一天添加单元格
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const status = getRoomStatusForDate(room, dateStr);
+                    const statusClass = getStatusClass(status);
+                    $grid.append(`<div class="calendar-cell day-cell ${statusClass}" title="${dateStr}: ${status}"></div>`);
+                }
+            });
+            
+            $container.append($grid);
+        }
+
+        function getRoomStatusForDate(room, dateStr) {
+            // 如果房间没有租期信息，则认为空闲
+            if (!room.rent_start_date || !room.rent_end_date) {
+                return '空闲';
+            }
+            
+            // 检查指定日期是否在租期内
+            if (dateStr >= room.rent_start_date && dateStr <= room.rent_end_date) {
+                return '已入住';
+            }
+            
+            return '空闲';
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case '已入住':
+                    return 'occupied';
+                case '空闲':
+                    return 'available';
+                default:
+                    return 'unknown';
+            }
+        }
+    </script>
+</body>
+</html>
