@@ -222,12 +222,41 @@ def room(room_id):
     return render_template('edit_room.html', room=room)
 
 
-# 返回所有房间信息
 @app.route('/rooms')
 def rooms():
     conn = sqlite3.connect('hotel.db')
     c = conn.cursor()
-    c.execute('SELECT * FROM rooms ORDER BY floor, number')
+    
+    # 获取查询参数
+    status = request.args.get('status')
+    floor = request.args.get('floor')
+    number = request.args.get('number')
+    
+    # 构建查询语句
+    query = 'SELECT * FROM rooms'
+    conditions = []
+    params = []
+    
+    if status:
+        if status == '空闲':
+            conditions.append("status = 'available'")
+        elif status == '已入住':
+            conditions.append("status = 'occupied'")
+    
+    if floor:
+        conditions.append('floor = ?')
+        params.append(int(floor))
+        
+    if number:
+        conditions.append('number = ?')
+        params.append(int(number))
+    
+    if conditions:
+        query += ' WHERE ' + ' AND '.join(conditions)
+    
+    query += ' ORDER BY floor, number'
+    
+    c.execute(query, params)
     rooms = c.fetchall()
     conn.close()
     # 返回结构性map json列表，方便前端渲染
